@@ -12,6 +12,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var intensity: UISlider!
+    @IBOutlet weak var changeFilter: UIButton!
+
     var currentImage: UIImage!
     // Core Image context, the component that handles rendering
     var context: CIContext!
@@ -80,7 +82,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
     // the third param is a selector for the callback, which is spelled out for ease of reading
     @IBAction func save(sender: AnyObject) {
-        UIImageWriteToSavedPhotosAlbum(imageView.image!, self, "image:didFinishSavingWithError:contextInfo", nil)
+        // only save to album is an image has been selected
+        if currentImage != nil {
+            UIImageWriteToSavedPhotosAlbum(imageView.image!, self, "image:didFinishSavingWithError:contextInfo", nil)
+        }
     }
 
     // this method is invoked whenever the slider is moved
@@ -125,10 +130,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
     func setFilter(action: UIAlertAction!) {
         // update currentFilter with the chosen filter
-        currentFilter = CIFilter(name: action.title!)
+        let filterName = action.title!
+        currentFilter = CIFilter(name: filterName)
         // set the kCIInputImageKey key again, since the filter was just changed
         let beginImage = CIImage(image: currentImage)
         currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
+        // change the text of "Change Filter" button to the filter name
+        changeFilter.setTitle(filterName, forState: .Normal)
 
         applyProcessing()
     }
